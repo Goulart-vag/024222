@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024/03/06 08:44:54.000.255,=C:\Users\Desenv4.SEO\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/03/06 09:03:53.000.759,C:\Users\Desenv4.SEO\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\Desenv4.SEO\Desktop\trabalhos de pesquisa\024222\SEOCorpAppVerificadorSistema.dfm</Transaction>
+    <Transaction>2024/03/06 09:03:53.000.759,C:\Users\Desenv4.SEO\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\Desenv4.SEO\Desktop\trabalhos de pesquisa\024222\SEOCorpAppVerificadorSistema.pas</Transaction>
+    <Transaction>2024/03/06 09:04:09.000.222,C:\Users\Desenv4.SEO\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\Desenv4.SEO\Desktop\trabalhos de pesquisa\024222\FrmPrincipal.dproj</Transaction>
+    <Transaction>2024/03/06 13:38:50.342,=C:\Users\Desenv4.SEO\Desktop\trabalhos de pesquisa\024222\Unit1.pas</Transaction>
+    <Transaction>2024/03/06 13:39:09.310,C:\Users\Desenv4.SEO\Desktop\trabalhos de pesquisa\024222\Contador.pas=C:\Users\Desenv4.SEO\Desktop\trabalhos de pesquisa\024222\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>

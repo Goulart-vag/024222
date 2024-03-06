@@ -1,0 +1,202 @@
+unit SEOCorpAppVerificadorSistema;
+
+interface
+
+uses
+        Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+        System.Classes, Vcl.Graphics,
+        Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Menus;
+
+type
+        TForm1 = class(TForm)
+                TrayIcon1: TTrayIcon;
+                PopupMenu1: TPopupMenu;
+                Aoba1: TMenuItem;
+                procedure FormCreate(Sender: TObject);
+                procedure TrayIcon1Click(Sender: TObject);
+                procedure Aoba1Click(Sender: TObject);
+                procedure FormDestroy(Sender: TObject);
+                procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        private
+                { Private declarations }
+        public
+                { Public declarations }
+
+        end;
+
+var
+        Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+uses
+  Contador;
+
+function getNomeComputador: String;
+var
+        tamanho: cardinal;
+        nomeComputador: array [0 .. MAX_PATH] of char;
+begin
+        tamanho := MAX_PATH;
+        GetComputerName(nomeComputador, tamanho);
+        Result := nomeComputador;
+end;
+
+function getOS: string;
+var
+        verInfo: TOSVersionInfo;
+begin
+        verInfo.dwOSVersionInfoSize := SizeOf(TOSVersionInfo);
+        if GetVersionEx(verInfo) then
+        begin
+                case verInfo.dwPlatformId of
+                        VER_PLATFORM_WIN32s:
+                                Result := 'Windows 3.1';
+                        VER_PLATFORM_WIN32_WINDOWS:
+                                begin
+                                        if (verInfo.dwMajorVersion = 4) and
+                                        (verInfo.dwMinorVersion = 0) then
+                                        Result := 'Windows 95'
+                                        else if (verInfo.dwMajorVersion = 4) and
+                                        (verInfo.dwMinorVersion = 10) then
+                                        Result := 'Windows 98'
+                                        else
+                                        Result := 'Windows 95/98 (versão desconhecida)';
+                                end;
+                        VER_PLATFORM_WIN32_NT:
+                                begin
+                                        case verInfo.dwMajorVersion of
+                                        3:
+                                        Result := 'Windows NT 3.51';
+                                        4:
+                                        Result := 'Windows NT 4.0';
+                                        5:
+                                        begin
+                                        if verInfo.dwMinorVersion = 0 then
+                                        Result := 'Windows 2000'
+                                        else if verInfo.dwMinorVersion = 1 then
+                                        Result := 'Windows XP'
+                                        else
+                                        Result := 'Windows 2000/XP (versão desconhecida)';
+                                        end;
+                                        6:
+                                        begin
+                                        if verInfo.dwMinorVersion = 0 then
+                                        Result := 'Windows Vista'
+                                        else if verInfo.dwMinorVersion = 1 then
+                                        Result := 'Windows 7'
+                                        else if verInfo.dwMinorVersion = 2 then
+                                        Result := 'Windows 8'
+                                        else if verInfo.dwMinorVersion = 3 then
+                                        Result := 'Windows 8.1'
+                                        else
+                                        Result := 'Windows Vista/7/8/8.1 (versão desconhecida)';
+                                        end;
+                                        10:
+                                        Result := 'Windows 10';
+                                        11:
+                                        Result := 'Windows 11';
+                                        else
+                                        Result := 'Windows (versão desconhecida)';
+                                        end;
+                                end;
+                else
+                        Result := 'Sistema Operacional Desconhecido';
+                end;
+        end
+        else
+                Result := 'Erro ao obter informações do sistema operacional';
+end;
+
+function getTamanhoHD: int64;
+var
+        TotalSectors, BytesPerSector: int64;
+begin
+        TotalSectors := DiskSize(3);
+
+        BytesPerSector := DiskSize(1);
+
+        Result := TotalSectors * BytesPerSector;
+
+        Result := Result div (1024 * 1024 * 1024);
+        Result := Result - Result - Result;
+end;
+
+function getEspacoLivreHD: int64;
+begin
+        Result := DiskFree(3);
+
+        Result := Result div (1024 * 1024 * 1024);
+end;
+
+
+function getProcessador:string;
+var
+SystemInfo: TSystemInfo;
+begin
+  GetSystemInfo(SystemInfo);
+  ShowMessage(IntToStr(SystemInfo.dwProcessorType));
+end;
+
+function GetTamnhoRAM: int64;
+var
+  MemoryStatus: TMemoryStatusEx;
+begin
+  MemoryStatus.dwLength := SizeOf(MemoryStatus);
+  GlobalMemoryStatusEx(MemoryStatus);
+  Result := MemoryStatus.ullTotalPhys div 1024 div 1024 div 1024;
+end;
+
+procedure TForm1.Aoba1Click(Sender: TObject);
+begin
+        self.Close;
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+        self.Hide;
+        self.WindowState := wsMinimized;
+        TrayIcon1.Visible := true;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+var
+  contador:TContador;
+  tamanho:string;
+begin
+       tamanho := (inttostr(GetTamnhoRAM));
+        TrayIcon1.Hint := Format('Nome Computador: %s'#13 +
+                     'Sistema Operacional: %s'#13 +
+                     'Tamanho Total HD: %dGB'#13 +
+                     'Tamanho de memória RAM: %sGB'#13 +
+                     'Tamanho Disponível HD: %dGB',
+                     [getNomeComputador(), getOS(), getTamanhoHD(), tamanho, getEspacoLivreHD]);
+
+
+
+
+        self.WindowState := wsMinimized;
+        TrayIcon1.Visible := true;
+
+        contador := Tcontador.Create;
+        contador.resume;
+        self.Hide;
+
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+        self.Hide;
+        self.WindowState := wsMinimized;
+        TrayIcon1.Visible := true;
+end;
+
+procedure TForm1.TrayIcon1Click(Sender: TObject);
+begin
+        Show();
+        WindowState := wsNormal;
+end;
+
+end.

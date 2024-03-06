@@ -1,0 +1,183 @@
+unit Contador;
+
+interface
+
+uses
+  Classes,Winapi.Windows, System.SysUtils;
+
+type
+  TContador = class(TThread)
+  private
+    FContador: Integer;
+    procedure SetContador(Value: Integer);
+  public
+    property Contador: Integer read FContador write SetContador;
+  protected
+    procedure Execute; override;
+  end;
+
+implementation
+
+{ TContador }
+
+function getNomeComputador: String;
+var
+        tamanho: cardinal;
+        nomeComputador: array [0 .. MAX_PATH] of char;
+begin
+        tamanho := MAX_PATH;
+        GetComputerName(nomeComputador, tamanho);
+        Result := nomeComputador;
+end;
+
+function getOS: string;
+var
+        verInfo: TOSVersionInfo;
+begin
+        verInfo.dwOSVersionInfoSize := SizeOf(TOSVersionInfo);
+        if GetVersionEx(verInfo) then
+        begin
+                case verInfo.dwPlatformId of
+                        VER_PLATFORM_WIN32s:
+                                Result := 'Windows 3.1';
+                        VER_PLATFORM_WIN32_WINDOWS:
+                                begin
+                                        if (verInfo.dwMajorVersion = 4) and
+                                        (verInfo.dwMinorVersion = 0) then
+                                        Result := 'Windows 95'
+                                        else if (verInfo.dwMajorVersion = 4) and
+                                        (verInfo.dwMinorVersion = 10) then
+                                        Result := 'Windows 98'
+                                        else
+                                        Result := 'Windows 95/98 (versão desconhecida)';
+                                end;
+                        VER_PLATFORM_WIN32_NT:
+                                begin
+                                        case verInfo.dwMajorVersion of
+                                        3:
+                                        Result := 'Windows NT 3.51';
+                                        4:
+                                        Result := 'Windows NT 4.0';
+                                        5:
+                                        begin
+                                        if verInfo.dwMinorVersion = 0 then
+                                        Result := 'Windows 2000'
+                                        else if verInfo.dwMinorVersion = 1 then
+                                        Result := 'Windows XP'
+                                        else
+                                        Result := 'Windows 2000/XP (versão desconhecida)';
+                                        end;
+                                        6:
+                                        begin
+                                        if verInfo.dwMinorVersion = 0 then
+                                        Result := 'Windows Vista'
+                                        else if verInfo.dwMinorVersion = 1 then
+                                        Result := 'Windows 7'
+                                        else if verInfo.dwMinorVersion = 2 then
+                                        Result := 'Windows 8'
+                                        else if verInfo.dwMinorVersion = 3 then
+                                        Result := 'Windows 8.1'
+                                        else
+                                        Result := 'Windows Vista/7/8/8.1 (versão desconhecida)';
+                                        end;
+                                        10:
+                                        Result := 'Windows 10';
+                                        11:
+                                        Result := 'Windows 11';
+                                        else
+                                        Result := 'Windows (versão desconhecida)';
+                                        end;
+                                end;
+                else
+                        Result := 'Sistema Operacional Desconhecido';
+                end;
+        end
+        else
+                Result := 'Erro ao obter informações do sistema operacional';
+end;
+
+function getTamanhoHD: int64;
+var
+        TotalSectors, BytesPerSector: int64;
+begin
+        TotalSectors := DiskSize(3);
+
+        BytesPerSector := DiskSize(1);
+
+        Result := TotalSectors * BytesPerSector;
+
+        Result := Result div (1024 * 1024 * 1024);
+        Result := Result - Result - Result;
+end;
+
+function getEspacoLivreHD: int64;
+begin
+        Result := DiskFree(3);
+
+        Result := Result div (1024 * 1024 * 1024);
+end;
+
+function GetTamanhoRAM: int64;
+var
+  MemoryStatus: TMemoryStatusEx;
+begin
+  MemoryStatus.dwLength := SizeOf(MemoryStatus);
+  GlobalMemoryStatusEx(MemoryStatus);
+  Result := MemoryStatus.ullTotalPhys div 1024 div 1024 div 1024;
+end;
+
+procedure TContador.SetContador(Value: Integer);
+begin
+  FContador := Value;
+
+end;
+
+procedure TContador.Execute;
+var
+ArquivoTexto: TextFile;
+begin
+  try
+        AssignFile(ArquivoTexto,'C:\Users\Desenv4.SEO\Desktop\status_pc.txt');
+        Rewrite(ArquivoTexto);
+        writeln(ArquivoTexto, 'Nome Computador: ' +
+        getNomeComputador());
+        writeln(ArquivoTexto, 'Sistema Operacional: ' + getOS());
+        writeln(ArquivoTexto, 'Tamanho Total HD: ' + inttostr(getTamanhoHD()));
+        writeln(ArquivoTexto, 'Tamanho Disponível HD: ' +inttostr(getEspacoLivreHD));
+        writeln(ArquivoTexto, 'Tamanho da memória RAM: ' +inttostr(GetTamanhoRAM));
+      finally
+        CloseFile(ArquivoTexto);
+      end;
+
+
+  while true do
+  begin
+    if contador < 10 then
+    begin
+      SetContador(Contador + 1);
+      sleep(1000);
+    end
+    else
+    begin
+      try
+        AssignFile(ArquivoTexto,'C:\Users\Desenv4.SEO\Desktop\status_pc.txt');
+        Rewrite(ArquivoTexto);
+        writeln(ArquivoTexto, 'Nome Computador: ' +
+        getNomeComputador());
+        writeln(ArquivoTexto, 'Sistema Operacional: ' + getOS());
+        writeln(ArquivoTexto, 'Tamanho Total HD: ' + inttostr(getTamanhoHD()));
+        writeln(ArquivoTexto, 'Tamanho Disponível HD: ' +inttostr(getEspacoLivreHD));
+        writeln(ArquivoTexto, inttostr(contador));
+      finally
+        CloseFile(ArquivoTexto);
+      end;
+
+      SetContador(0);
+      sleep(1000);
+     end;
+  end;
+
+  
+end;
+
+end.
